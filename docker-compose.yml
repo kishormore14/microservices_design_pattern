@@ -1,0 +1,137 @@
+version: "3.8"
+
+services:
+  # --- Infrastructure ---
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: hrms
+      RABBITMQ_DEFAULT_PASS: hrms_secret
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "check_port_connectivity"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  user-db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_DB: user_db
+      POSTGRES_USER: hrms
+      POSTGRES_PASSWORD: hrms_secret
+    ports:
+      - "5433:5432"
+    volumes:
+      - user_db_data:/var/lib/postgresql/data
+
+  employee-db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_DB: employee_db
+      POSTGRES_USER: hrms
+      POSTGRES_PASSWORD: hrms_secret
+    ports:
+      - "5434:5432"
+    volumes:
+      - employee_db_data:/var/lib/postgresql/data
+
+  payroll-db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_DB: payroll_db
+      POSTGRES_USER: hrms
+      POSTGRES_PASSWORD: hrms_secret
+    ports:
+      - "5435:5432"
+    volumes:
+      - payroll_db_data:/var/lib/postgresql/data
+
+  # --- Services ---
+  user-service:
+    build: ./user-service
+    ports:
+      - "3001:3001"
+    environment:
+      PORT: 3001
+      DB_HOST: user-db
+      DB_PORT: 5432
+      DB_NAME: user_db
+      DB_USER: hrms
+      DB_PASSWORD: hrms_secret
+      RABBITMQ_URL: amqp://hrms:hrms_secret@rabbitmq:5672
+      JWT_SECRET: hrms_jwt_secret_key_change_in_production
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      user-db:
+        condition: service_started
+
+  employee-service:
+    build: ./employee-service
+    ports:
+      - "3002:3002"
+    environment:
+      PORT: 3002
+      DB_HOST: employee-db
+      DB_PORT: 5432
+      DB_NAME: employee_db
+      DB_USER: hrms
+      DB_PASSWORD: hrms_secret
+      RABBITMQ_URL: amqp://hrms:hrms_secret@rabbitmq:5672
+      USER_SERVICE_URL: http://user-service:3001
+      JWT_SECRET: hrms_jwt_secret_key_change_in_production
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      employee-db:
+        condition: service_started
+
+  payroll-service:
+    build: ./payroll-service
+    ports:
+      - "3003:3003"
+    environment:
+      PORT: 3003
+      DB_HOST: payroll-db
+      DB_PORT: 5432
+      DB_NAME: payroll_db
+      DB_USER: hrms
+      DB_PASSWORD: hrms_secret
+      RABBITMQ_URL: amqp://hrms:hrms_secret@rabbitmq:5672
+      EMPLOYEE_SERVICE_URL: http://employee-service:3002
+      JWT_SECRET: hrms_jwt_secret_key_change_in_production
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      payroll-db:
+        condition: service_started
+
+  api-gateway:
+    build: ./api-gateway
+    ports:
+      - "3000:3000"
+    environment:
+      PORT: 3000
+      USER_SERVICE_URL: http://user-service:3001
+      EMPLOYEE_SERVICE_URL: http://employee-service:3002
+      PAYROLL_SERVICE_URL: http://payroll-service:3003
+      JWT_SECRET: hrms_jwt_secret_key_change_in_production
+    depends_on:
+      - user-service
+      - employee-service
+      - payroll-service
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "8080:80"
+    depends_on:
+      - api-gateway
+
+volumes:
+  user_db_data:
+  employee_db_data:
+  payroll_db_data:
