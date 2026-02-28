@@ -1,0 +1,17 @@
+﻿syntax = "proto3";
+
+package hrms.employee.events.v1;
+
+option java_multiple_files = true;
+option go_package = "github.com/acme/hrms/proto/employee/events/v1";
+
+message EmployeeCreated {
+  string event_id = 1;
+  string occurred_at = 2;
+  string schema_version = 3; // semver, example: 1.0.0
+  string employee_id = 4;
+  string email = 5;
+  string first_name = 6;
+  string last_name = 7;
+  string department = 8;
+}

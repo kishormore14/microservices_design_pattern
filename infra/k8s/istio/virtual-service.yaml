@@ -1,0 +1,28 @@
+﻿apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: employee-profile-vs
+  namespace: hrms-development
+spec:
+  hosts:
+    - api.development.hrms.internal
+  gateways:
+    - istio-system/hrms-gateway
+  http:
+    - match:
+        - uri:
+            prefix: /api/v1/employees
+      retries:
+        attempts: 3
+        perTryTimeout: 500ms
+      timeout: 2s
+      route:
+        - destination:
+            host: hrms-employee-profile-service.hrms-development.svc.cluster.local
+            subset: stable
+          weight: 90
+        - destination:
+            host: hrms-employee-profile-service.hrms-development.svc.cluster.local
+            subset: canary
+          weight: 10
+

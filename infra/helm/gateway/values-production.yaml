@@ -1,0 +1,9 @@
+﻿ingressClassName: nginx
+host: api.development.hrms.internal
+tlsSecretName: hrms-platform-tls
+issuerName: letsencrypt-prod
+routes:
+  - path: /api/v1/employees
+    serviceName: hrms-employee-profile-service
+    servicePort: 80
+

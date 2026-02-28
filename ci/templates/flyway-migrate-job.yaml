@@ -1,0 +1,21 @@
+﻿name: flyway-migrate
+on:
+  workflow_dispatch:
+  push:
+    branches: [develop, main]
+    paths:
+      - 'infra/flyway/**'
+
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run Flyway migration
+        uses: flyway/flyway-action@v1
+        with:
+          url: ${{ secrets.FLYWAY_URL }}
+          user: ${{ secrets.FLYWAY_USER }}
+          password: ${{ secrets.FLYWAY_PASSWORD }}
+          locations: filesystem:infra/flyway/sql
+          command: migrate

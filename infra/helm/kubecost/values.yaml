@@ -1,0 +1,17 @@
+﻿global:
+  prometheus:
+    enabled: false
+
+kubecostToken: "replace-me"
+
+prometheus:
+  server:
+    persistentVolume:
+      enabled: true
+      size: 20Gi
+
+kubecostProductConfigs:
+  clusterName: hrms-dev
+
+networkCosts:
+  enabled: true

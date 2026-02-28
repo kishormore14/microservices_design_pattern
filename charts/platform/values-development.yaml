@@ -1,0 +1,7 @@
+﻿employee-profile-service:
+  image:
+    tag: sha-unknown
+
+hrms-gateway:
+  host: api.development.hrms.internal
+

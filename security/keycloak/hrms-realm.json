@@ -1,0 +1,38 @@
+﻿{
+  "realm": "hrms",
+  "enabled": true,
+  "displayName": "HRMS Platform",
+  "sslRequired": "external",
+  "registrationAllowed": false,
+  "clients": [
+    {
+      "clientId": "hrms-web",
+      "enabled": true,
+      "publicClient": true,
+      "standardFlowEnabled": true,
+      "directAccessGrantsEnabled": false,
+      "redirectUris": [
+        "https://app.dev.hrms.internal/*",
+        "https://app.hrms.internal/*"
+      ],
+      "webOrigins": [
+        "+"
+      ],
+      "protocol": "openid-connect"
+    }
+  ],
+  "users": [
+    {
+      "username": "platform.admin",
+      "enabled": true,
+      "email": "platform.admin@acme.example",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "ChangeMe!123",
+          "temporary": true
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,19 @@
+﻿apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: require-signed-images
+spec:
+  validationFailureAction: Enforce
+  background: false
+  rules:
+    - name: check-image-registry
+      match:
+        any:
+          - resources:
+              kinds: ["Pod"]
+      validate:
+        message: "Only GHCR images under ghcr.io/acme/hrms are allowed"
+        pattern:
+          spec:
+            containers:
+              - image: "ghcr.io/acme/hrms/*"

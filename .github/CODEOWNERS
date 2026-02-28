@@ -1,0 +1,6 @@
+﻿* @acme/platform-owners
+/services/ @acme/backend-team
+/frontend/ @acme/frontend-team
+/infra/ @acme/platform-team
+/observability/ @acme/sre-team
+/security/ @acme/security-team

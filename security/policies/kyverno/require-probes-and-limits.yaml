@@ -1,0 +1,37 @@
+﻿apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: require-probes-and-limits
+spec:
+  validationFailureAction: Enforce
+  background: true
+  rules:
+    - name: check-probes
+      match:
+        any:
+          - resources:
+              kinds: ["Pod"]
+      validate:
+        message: "Containers must define liveness/readiness probes"
+        pattern:
+          spec:
+            containers:
+              - livenessProbe: {}
+                readinessProbe: {}
+    - name: check-resources
+      match:
+        any:
+          - resources:
+              kinds: ["Pod"]
+      validate:
+        message: "Containers must define CPU/memory requests and limits"
+        pattern:
+          spec:
+            containers:
+              - resources:
+                  requests:
+                    cpu: "?*"
+                    memory: "?*"
+                  limits:
+                    cpu: "?*"
+                    memory: "?*"

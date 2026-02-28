@@ -1,0 +1,20 @@
+﻿{{- if .Values.keda.enabled }}
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: {{ include "employee-profile-service.fullname" . }}-rps
+spec:
+  scaleTargetRef:
+    name: {{ include "employee-profile-service.fullname" . }}
+  pollingInterval: {{ .Values.keda.pollingInterval }}
+  cooldownPeriod: {{ .Values.keda.cooldownPeriod }}
+  minReplicaCount: {{ .Values.keda.minReplicaCount }}
+  maxReplicaCount: {{ .Values.keda.maxReplicaCount }}
+  triggers:
+    - type: prometheus
+      metadata:
+        serverAddress: {{ .Values.keda.prometheusServerAddress | quote }}
+        metricName: employee_profile_service_rps
+        query: {{ .Values.keda.rpsMetricQuery | quote }}
+        threshold: {{ .Values.keda.targetRpsPerPod | quote }}
+{{- end }}

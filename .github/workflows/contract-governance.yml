@@ -1,0 +1,40 @@
+﻿name: contract-governance
+
+on:
+  pull_request:
+  push:
+    branches: [develop, main]
+
+jobs:
+  openapi-lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Lint OpenAPI
+        uses: char0n/swagger-editor-validate@v1
+        with:
+          definition-file: contracts/openapi/employee-profile.openapi.yaml
+
+  openapi-breaking-check:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Extract baseline spec from main
+        run: |
+          git show origin/main:contracts/openapi/employee-profile.openapi.yaml > contracts/openapi/.base.yaml || cp contracts/openapi/employee-profile.openapi.yaml contracts/openapi/.base.yaml
+      - name: Check for breaking changes
+        run: |
+          docker run --rm -v $PWD:/spec openapitools/openapi-diff:latest \
+            /spec/contracts/openapi/.base.yaml /spec/contracts/openapi/employee-profile.openapi.yaml \
+            --fail-on-incompatible
+
+  pact-provider-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Pact broker compatibility gate
+        run: |
+          echo "Add pact-broker can-i-deploy with broker URL/token secrets"

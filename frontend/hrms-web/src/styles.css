@@ -1,0 +1,19 @@
+﻿:root {
+  --bg: #f3f6f9;
+  --fg: #11212d;
+}
+
+body {
+  margin: 0;
+  font-family: "Segoe UI", "Helvetica Neue", sans-serif;
+  background: radial-gradient(circle at top right, #d6e4f0, var(--bg));
+  color: var(--fg);
+}
+
+.layout {
+  min-height: 100vh;
+  display: grid;
+  place-content: center;
+  text-align: center;
+  gap: 1rem;
+}

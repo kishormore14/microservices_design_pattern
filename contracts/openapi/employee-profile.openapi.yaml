@@ -1,0 +1,16 @@
+﻿openapi: 3.0.3
+info:
+  title: Employee Profile API
+  version: 1.0.0
+paths:
+  /api/v1/employees:
+    get:
+      operationId: listEmployees
+      responses:
+        '200':
+          description: OK
+    post:
+      operationId: createEmployee
+      responses:
+        '201':
+          description: Created

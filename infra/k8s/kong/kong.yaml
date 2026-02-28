@@ -1,0 +1,33 @@
+﻿_format_version: "3.0"
+_transform: true
+
+services:
+  - name: employee-profile-rest
+    url: http://hrms-employee-profile-service.hrms-dev.svc.cluster.local:80
+    routes:
+      - name: employee-profile-route
+        paths:
+          - /api/v1/employees
+        methods: [GET, POST]
+        strip_path: false
+
+plugins:
+  - name: rate-limiting
+    config:
+      second: 50000
+      minute: 3000000
+      policy: redis
+      redis_host: redis.redis.svc.cluster.local
+      redis_port: 6379
+      fault_tolerant: true
+  - name: cors
+    config:
+      origins: ["https://app.dev.hrms.internal", "https://app.hrms.internal"]
+      methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"]
+      headers: ["Authorization", "Content-Type", "X-Request-ID", "traceparent"]
+      credentials: true
+  - name: request-transformer
+    config:
+      add:
+        headers:
+          - "X-Platform:hrms"

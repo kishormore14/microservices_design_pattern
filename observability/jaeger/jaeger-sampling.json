@@ -1,0 +1,18 @@
+﻿{
+  "service_strategies": [
+    {
+      "service": "employee-profile-service",
+      "type": "probabilistic",
+      "param": 0.2
+    },
+    {
+      "service": "hrms-web",
+      "type": "probabilistic",
+      "param": 0.1
+    }
+  ],
+  "default_strategy": {
+    "type": "probabilistic",
+    "param": 0.05
+  }
+}

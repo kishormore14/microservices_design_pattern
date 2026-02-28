@@ -1,0 +1,30 @@
+﻿server:
+  config:
+    persistence:
+      default:
+        driver: sql
+        sql:
+          pluginName: postgres
+          host: temporal-postgres.hrms-dev.svc.cluster.local
+          port: 5432
+          database: temporal
+          user: temporal
+          password: "replace-me"
+      visibility:
+        driver: sql
+        sql:
+          pluginName: postgres
+          host: temporal-postgres.hrms-dev.svc.cluster.local
+          port: 5432
+          database: temporal_visibility
+          user: temporal
+          password: "replace-me"
+
+frontend:
+  replicaCount: 3
+history:
+  replicaCount: 3
+matching:
+  replicaCount: 3
+worker:
+  replicaCount: 3

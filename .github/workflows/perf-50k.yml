@@ -1,0 +1,20 @@
+﻿name: perf-50k
+
+on:
+  workflow_dispatch:
+    inputs:
+      base_url:
+        description: 'Base URL for 50k rps test'
+        required: true
+        default: 'https://api.hrms.internal'
+
+jobs:
+  k6-50k:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run k6 50k rps profile
+        uses: grafana/k6-action@v0.3.1
+        with:
+          filename: ci/k6-50k-rps.js
+          flags: --env BASE_URL=${{ github.event.inputs.base_url }}

@@ -1,0 +1,67 @@
+﻿replicaCount: 24
+
+resources:
+  requests:
+    cpu: "1500m"
+    memory: "2Gi"
+  limits:
+    cpu: "3000m"
+    memory: "4Gi"
+
+autoscaling:
+  enabled: true
+  minReplicas: 24
+  maxReplicas: 320
+  targetCPUUtilizationPercentage: 55
+  targetMemoryUtilizationPercentage: 70
+  behavior:
+    scaleUp:
+      stabilizationWindowSeconds: 0
+      policies:
+        - type: Pods
+          value: 24
+          periodSeconds: 30
+        - type: Percent
+          value: 100
+          periodSeconds: 30
+    scaleDown:
+      stabilizationWindowSeconds: 600
+      policies:
+        - type: Percent
+          value: 10
+          periodSeconds: 60
+
+keda:
+  enabled: true
+  pollingInterval: 10
+  cooldownPeriod: 300
+  minReplicaCount: 24
+  maxReplicaCount: 320
+  prometheusServerAddress: http://prometheus-server.observability.svc.cluster.local
+  rpsMetricQuery: sum(rate(http_server_requests_seconds_count{service="employee-profile-service"}[1m]))
+  targetRpsPerPod: "180"
+
+env:
+  PORT: "3000"
+  GRPC_BIND_ADDRESS: "0.0.0.0:50051"
+  KAFKA_ENABLED: "true"
+  KAFKA_BROKERS: "kafka.kafka.svc.cluster.local:9092"
+  RABBITMQ_ENABLED: "true"
+  RABBITMQ_URL: "amqp://guest:guest@rabbitmq.rabbitmq.svc.cluster.local:5672"
+  KEEP_ALIVE_TIMEOUT_MS: "65000"
+  HEADERS_TIMEOUT_MS: "66000"
+  REQUEST_TIMEOUT_MS: "10000"
+  NODE_OPTIONS: "--max-old-space-size=3072"
+  UV_THREADPOOL_SIZE: "64"
+
+podDisruptionBudget:
+  enabled: true
+  minAvailable: 80%
+
+terminationGracePeriodSeconds: 60
+
+topologySpreadConstraints:
+  enabled: true
+  maxSkew: 1
+  topologyKey: topology.kubernetes.io/zone
+  whenUnsatisfiable: DoNotSchedule

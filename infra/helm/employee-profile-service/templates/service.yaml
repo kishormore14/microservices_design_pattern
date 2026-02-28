@@ -1,0 +1,18 @@
+﻿apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "employee-profile-service.fullname" . }}
+spec:
+  type: {{ .Values.service.type }}
+  selector:
+    app.kubernetes.io/name: {{ include "employee-profile-service.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+  ports:
+    - name: http
+      protocol: TCP
+      port: {{ .Values.service.restPort }}
+      targetPort: {{ .Values.service.restTargetPort }}
+    - name: grpc
+      protocol: TCP
+      port: {{ .Values.service.grpcPort }}
+      targetPort: {{ .Values.service.grpcPort }}

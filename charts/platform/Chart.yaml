@@ -1,0 +1,12 @@
+﻿apiVersion: v2
+name: hrms-platform
+description: Umbrella chart for HRMS platform
+version: 0.1.0
+appVersion: 1.0.0
+dependencies:
+  - name: employee-profile-service
+    version: 0.1.0
+    repository: file://../../infra/helm/employee-profile-service
+  - name: hrms-gateway
+    version: 0.1.0
+    repository: file://../../infra/helm/gateway

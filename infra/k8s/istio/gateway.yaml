@@ -1,0 +1,19 @@
+﻿apiVersion: networking.istio.io/v1beta1
+kind: Gateway
+metadata:
+  name: hrms-gateway
+  namespace: istio-system
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+    - port:
+        number: 443
+        name: https
+        protocol: HTTPS
+      tls:
+        mode: SIMPLE
+        credentialName: hrms-platform-tls
+      hosts:
+        - api.dev.hrms.internal
+        - app.dev.hrms.internal

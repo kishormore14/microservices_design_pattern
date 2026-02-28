@@ -1,0 +1,103 @@
+﻿replicaCount: 2
+
+image:
+  repository: ghcr.io/acme/hrms/employee-profile-service
+  pullPolicy: IfNotPresent
+  tag: "sha-unknown"
+
+service:
+  type: ClusterIP
+  restPort: 80
+  restTargetPort: 3000
+  grpcPort: 50051
+
+ingress:
+  enabled: false
+  className: nginx
+  host: employee.dev.hrms.internal
+  tlsSecretName: hrms-tls
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 256Mi
+  limits:
+    cpu: 500m
+    memory: 512Mi
+
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 8
+  targetCPUUtilizationPercentage: 65
+  targetMemoryUtilizationPercentage: 70
+  behavior:
+    scaleUp:
+      stabilizationWindowSeconds: 0
+      policies:
+        - type: Percent
+          value: 100
+          periodSeconds: 30
+    scaleDown:
+      stabilizationWindowSeconds: 300
+      policies:
+        - type: Percent
+          value: 20
+          periodSeconds: 60
+
+keda:
+  enabled: false
+  pollingInterval: 15
+  cooldownPeriod: 180
+  minReplicaCount: 2
+  maxReplicaCount: 8
+  prometheusServerAddress: http://prometheus-server.observability.svc.cluster.local
+  rpsMetricQuery: sum(rate(http_server_requests_seconds_count{service="employee-profile-service"}[1m]))
+  targetRpsPerPod: "200"
+
+env:
+  PORT: "3000"
+  GRPC_BIND_ADDRESS: "0.0.0.0:50051"
+  KAFKA_ENABLED: "true"
+  KAFKA_BROKERS: "kafka.kafka.svc.cluster.local:9092"
+  RABBITMQ_ENABLED: "true"
+  RABBITMQ_URL: "amqp://guest:guest@rabbitmq.rabbitmq.svc.cluster.local:5672"
+  KEEP_ALIVE_TIMEOUT_MS: "65000"
+  HEADERS_TIMEOUT_MS: "66000"
+  REQUEST_TIMEOUT_MS: "15000"
+  NODE_OPTIONS: "--max-old-space-size=1024"
+  UV_THREADPOOL_SIZE: "32"
+
+secretEnv:
+  DATABASE_URL: ""
+
+probes:
+  readinessPath: /api/v1/employees
+  livenessPath: /api/v1/employees
+
+serviceAccount:
+  create: true
+  name: ""
+
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 65532
+  runAsGroup: 65532
+
+securityContext:
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: true
+  capabilities:
+    drop: ["ALL"]
+
+podDisruptionBudget:
+  enabled: true
+  minAvailable: 70%
+
+terminationGracePeriodSeconds: 60
+
+topologySpreadConstraints:
+  enabled: true
+  maxSkew: 1
+  topologyKey: topology.kubernetes.io/zone
+  whenUnsatisfiable: ScheduleAnyway
